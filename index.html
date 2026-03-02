@@ -5,68 +5,75 @@
 <title>CRM HOÀNG LONG</title>
 
 <style>
-body {
-    font-family: "Times New Roman";
-    margin: 0;
-    background: #f4f6f8;
+body{
+    font-family:"Times New Roman";
+    margin:0;
+    background:#f2f2f2;
 }
-header {
-    background: #0b5ed7;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-size: 28px;
-    font-weight: bold;
+header{
+    background:#0b3c78;
+    color:#fff;
+    padding:15px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
 }
-nav {
-    display: flex;
-    background: #e9ecef;
+nav{
+    display:flex;
+    background:#ddd;
 }
-nav button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
+nav button{
+    flex:1;
+    padding:12px;
+    font-size:16px;
+    border:none;
+    cursor:pointer;
 }
-nav button.active {
-    background: #0b5ed7;
-    color: white;
+nav button.active{
+    background:#0b3c78;
+    color:white;
 }
-section {
-    display: none;
-    padding: 20px;
+section{
+    display:none;
+    padding:20px;
 }
-section.active {
-    display: block;
+section.active{
+    display:block;
 }
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
 }
-th, td {
-    border: 1px solid #333;
-    padding: 5px;
-    text-align: center;
+th,td{
+    border:1px solid #333;
+    padding:5px;
+    text-align:center;
 }
-th {
-    background: #f1f1f1;
+th{
+    background:#e0e0e0;
 }
-input {
-    width: 100%;
-    border: none;
-    text-align: center;
-    outline: none;
+input{
+    width:100%;
+    border:none;
+    text-align:center;
+    outline:none;
 }
-.total {
-    background: #ffc107;
-    font-weight: bold;
+input:disabled{
+    background:#f5f5f5;
 }
-.month-list button {
-    margin: 5px;
-    padding: 8px 12px;
-    cursor: pointer;
+.total{
+    background:#f4c430;
+    font-weight:bold;
+}
+button.action{
+    padding:8px 14px;
+    margin:10px 5px 0 0;
+    font-size:15px;
+}
+.month-btn{
+    padding:8px 12px;
+    margin:5px;
 }
 </style>
 </head>
@@ -76,161 +83,205 @@ input {
 <header>CRM HOÀNG LONG</header>
 
 <nav>
-    <button id="btnInput" class="active">📥 Nhập thông tin</button>
-    <button id="btnLog">📚 Nhật ký</button>
+    <button id="btnNhap" class="active">📥 Nhập thông tin</button>
+    <button id="btnNhatKy">📚 Nhật ký</button>
 </nav>
 
 <!-- NHẬP LIỆU -->
-<section id="inputSection" class="active">
+<section id="nhap" class="active">
     <h2>
-        BẢNG KÊ THÁNG
-        <input type="month" id="monthPicker">
+        BẢNG KÊ THÁNG:
+        <input type="month" id="monthPicker"
+               style="font-size:16px;padding:5px;margin-left:10px;">
     </h2>
 
-    <table id="dataTable">
+    <table>
         <thead>
-            <tr>
-                <th>Khách hàng</th>
-                <th>Số ĐT</th>
-                <th>Xe</th>
-                <th>Cước vận chuyển</th>
-                <th>KH kê thêm</th>
-                <th>Hạ rỗng</th>
-                <th>Cước cổng</th>
-                <th>Thu tiền</th>
-                <th>Tổng xhd</th>
-                <th>Ghi chú</th>
-            </tr>
+        <tr>
+            <th>Khách hàng</th>
+            <th>Số ĐT</th>
+            <th>Xe</th>
+            <th>Cước vận chuyển</th>
+            <th>KH kê thêm</th>
+            <th>Hạ rỗng</th>
+            <th>Cước cổng</th>
+            <th>Thu tiền</th>
+            <th>Tổng xhd</th>
+            <th>Ghi chú</th>
+        </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+
+        <tbody id="tbody"></tbody>
+
         <tfoot>
-            <tr class="total">
-                <td colspan="7">TỔNG THU</td>
-                <td id="totalMoney">0</td>
-                <td colspan="2"></td>
-            </tr>
+        <tr class="total">
+            <td colspan="7">TỔNG THU</td>
+            <td id="tongThu">0</td>
+            <td colspan="2"></td>
+        </tr>
         </tfoot>
     </table>
 
-    <br>
-    <button onclick="addRow()">➕ Thêm dòng</button>
-    <button onclick="saveMonth()">💾 Lưu tháng</button>
+    <button class="action" onclick="themDong()">➕ Thêm dòng</button>
+    <button class="action" onclick="luuThang()">💾 Lưu tháng</button>
+    <button class="action" onclick="chotThang()">🔒 Chốt tháng</button>
+    <button class="action" onclick="xuatExcel()">📤 Xuất Excel</button>
 </section>
 
 <!-- NHẬT KÝ -->
-<section id="logSection">
+<section id="nhatky">
     <h2>📚 NHẬT KÝ THEO THÁNG</h2>
-    <div class="month-list" id="monthList"></div>
+    <div id="dsThang"></div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
-const tableBody = document.getElementById("tableBody");
-const monthPicker = document.getElementById("monthPicker");
+const tbody=document.getElementById("tbody");
+const monthPicker=document.getElementById("monthPicker");
 
-document.getElementById("btnInput").onclick = () => showTab(true);
-document.getElementById("btnLog").onclick = () => showTab(false);
+btnNhap.onclick=()=>doiTab(true);
+btnNhatKy.onclick=()=>doiTab(false);
 
-function showTab(isInput) {
-    document.getElementById("inputSection").classList.toggle("active", isInput);
-    document.getElementById("logSection").classList.toggle("active", !isInput);
-    document.getElementById("btnInput").classList.toggle("active", isInput);
-    document.getElementById("btnLog").classList.toggle("active", !isInput);
-    if (!isInput) loadLog();
+function doiTab(nhap){
+    nhapSection=nhap;
+    document.getElementById("nhap").classList.toggle("active",nhap);
+    document.getElementById("nhatky").classList.toggle("active",!nhap);
+    btnNhap.classList.toggle("active",nhap);
+    btnNhatKy.classList.toggle("active",!nhap);
+    if(!nhap) taiNhatKy();
 }
 
-function addRow(data = {}) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td><input value="${data.kh || ''}"></td>
-        <td><input value="${data.dt || ''}"></td>
-        <td><input value="${data.xe || ''}"></td>
-        <td><input class="cuoc" value="${data.cuoc || ''}"></td>
-        <td><input class="kethem" value="${data.kethem || ''}"></td>
-        <td><input value="${data.harong || ''}"></td>
-        <td><input value="${data.cuong || ''}"></td>
-        <td><input class="thu" value="${data.thu || ''}"></td>
-        <td class="tong">0</td>
-        <td><input value="${data.note || ''}"></td>
-    `;
-    tableBody.appendChild(tr);
+function themDong(data={}){
+    if(daChotThang(monthPicker.value)) return;
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+    <td><input value="${data.kh||''}"></td>
+    <td><input value="${data.dt||''}"></td>
+    <td><input value="${data.xe||''}"></td>
+    <td><input class="cuoc" value="${data.cuoc||''}"></td>
+    <td><input class="kethem" value="${data.kethem||''}"></td>
+    <td><input value="${data.harong||''}"></td>
+    <td><input value="${data.cuoccong||''}"></td>
+    <td><input class="thu" value="${data.thu||''}"></td>
+    <td class="tong">0</td>
+    <td><input value="${data.note||''}"></td>`;
+    tbody.appendChild(tr);
 
-    tr.querySelectorAll("input").forEach(i => {
-        i.oninput = () => {
-            calculateRow(tr);
-            calculateTotal();
-        };
+    tr.querySelectorAll("input").forEach(i=>{
+        i.oninput=()=>{
+            tinhDong(tr);
+            tinhTong();
+        }
     });
-
-    calculateRow(tr);
+    tinhDong(tr);
 }
 
-function calculateRow(tr) {
-    const cuoc = Number(tr.querySelector(".cuoc").value) || 0;
-    const kethem = Number(tr.querySelector(".kethem").value) || 0;
-    tr.querySelector(".tong").textContent = (cuoc + kethem).toLocaleString("vi-VN");
+function tinhDong(tr){
+    const cuoc=Number(tr.querySelector(".cuoc").value)||0;
+    const kethem=Number(tr.querySelector(".kethem").value)||0;
+    tr.querySelector(".tong").innerText=(cuoc+kethem).toLocaleString("vi-VN");
 }
 
-function calculateTotal() {
-    let sum = 0;
-    document.querySelectorAll(".thu").forEach(i => {
-        sum += Number(i.value) || 0;
+function tinhTong(){
+    let tong=0;
+    document.querySelectorAll(".thu").forEach(i=>{
+        tong+=Number(i.value)||0;
     });
-    document.getElementById("totalMoney").textContent = sum.toLocaleString("vi-VN");
+    tongThu.innerText=tong.toLocaleString("vi-VN");
 }
 
-function saveMonth() {
-    if (!monthPicker.value) {
-        alert("Chọn tháng trước khi lưu!");
+function luuThang(){
+    if(!monthPicker.value){alert("Chọn tháng trước khi lưu!");return;}
+    if(daChotThang(monthPicker.value)){
+        alert("Tháng đã CHỐT, không thể lưu!");
         return;
     }
-    const rows = [];
-    document.querySelectorAll("#tableBody tr").forEach(tr => {
-        const inputs = tr.querySelectorAll("input");
-        rows.push({
-            kh: inputs[0].value,
-            dt: inputs[1].value,
-            xe: inputs[2].value,
-            cuoc: inputs[3].value,
-            kethem: inputs[4].value,
-            harong: inputs[5].value,
-            cuong: inputs[6].value,
-            thu: inputs[7].value,
-            note: inputs[8].value
+    const data=[];
+    document.querySelectorAll("#tbody tr").forEach(tr=>{
+        const i=tr.querySelectorAll("input");
+        data.push({
+            kh:i[0].value,dt:i[1].value,xe:i[2].value,
+            cuoc:i[3].value,kethem:i[4].value,
+            harong:i[5].value,cuoccong:i[6].value,
+            thu:i[7].value,note:i[8].value
         });
     });
-    localStorage.setItem("CRM_" + monthPicker.value, JSON.stringify(rows));
-    alert("Đã lưu tháng " + monthPicker.value);
+    localStorage.setItem("CRM_"+monthPicker.value,JSON.stringify(data));
+    alert("Đã lưu tháng "+monthPicker.value);
 }
 
-function loadMonthData(month) {
-    tableBody.innerHTML = "";
-    const data = JSON.parse(localStorage.getItem("CRM_" + month)) || [];
-    if (data.length === 0) addRow();
-    data.forEach(d => addRow(d));
-    calculateTotal();
+function chotThang(){
+    if(!monthPicker.value){alert("Chọn tháng trước khi chốt!");return;}
+    if(!confirm("Chốt tháng sẽ KHÔNG SỬA được. Tiếp tục?"))return;
+    localStorage.setItem("LOCK_"+monthPicker.value,"true");
+    khoaNhap(true);
+    alert("Đã chốt tháng "+monthPicker.value);
 }
 
-function loadLog() {
-    const list = document.getElementById("monthList");
-    list.innerHTML = "";
-    Object.keys(localStorage).forEach(k => {
-        if (k.startsWith("CRM_")) {
-            const month = k.replace("CRM_", "");
-            const btn = document.createElement("button");
-            btn.textContent = month;
-            btn.onclick = () => {
-                monthPicker.value = month;
-                showTab(true);
-                loadMonthData(month);
-            };
-            list.appendChild(btn);
+function daChotThang(thang){
+    return localStorage.getItem("LOCK_"+thang)==="true";
+}
+
+function khoaNhap(khoa){
+    document.querySelectorAll("input").forEach(i=>i.disabled=khoa);
+}
+
+function taiThang(thang){
+    tbody.innerHTML="";
+    const data=JSON.parse(localStorage.getItem("CRM_"+thang))||[];
+    if(data.length===0) themDong();
+    data.forEach(d=>themDong(d));
+    tinhTong();
+    khoaNhap(daChotThang(thang));
+}
+
+function taiNhatKy(){
+    dsThang.innerHTML="";
+    Object.keys(localStorage).forEach(k=>{
+        if(k.startsWith("CRM_")){
+            const thang=k.replace("CRM_","");
+            const b=document.createElement("button");
+            b.className="month-btn";
+            b.innerText=thang+(daChotThang(thang)?" 🔒":"");
+            b.onclick=()=>{
+                monthPicker.value=thang;
+                doiTab(true);
+                taiThang(thang);
+            }
+            dsThang.appendChild(b);
         }
     });
 }
 
-monthPicker.onchange = () => loadMonthData(monthPicker.value);
+function xuatExcel(){
+    if(!monthPicker.value){alert("Chọn tháng trước khi xuất!");return;}
+    const rows=[[
+        "Khách hàng","Số ĐT","Xe","Cước vận chuyển",
+        "KH kê thêm","Hạ rỗng","Cước cổng",
+        "Thu tiền","Tổng xhd","Ghi chú"
+    ]];
+    document.querySelectorAll("#tbody tr").forEach(tr=>{
+        const i=tr.querySelectorAll("input");
+        const tong=(Number(i[3].value)||0)+(Number(i[4].value)||0);
+        rows.push([
+            i[0].value,i[1].value,i[2].value,
+            i[3].value,i[4].value,
+            i[5].value,i[6].value,
+            i[7].value,tong,i[8].value
+        ]);
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Thang_"+monthPicker.value);
+    XLSX.writeFile(wb,"CRM_HOANG_LONG_"+monthPicker.value+".xlsx");
+}
 
-addRow();
+/* MẶC ĐỊNH THÁNG HIỆN TẠI */
+const now=new Date();
+monthPicker.value=now.toISOString().slice(0,7);
+taiThang(monthPicker.value);
+monthPicker.onchange=()=>taiThang(monthPicker.value);
 </script>
 
 </body>
