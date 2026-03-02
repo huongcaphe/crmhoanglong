@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>CRM HOÀNG LONG</title>
+
+<style>
+body {
+    font-family: "Times New Roman";
+    margin: 0;
+    background: #f4f6f8;
+}
+header {
+    background: #0b5ed7;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+nav {
+    display: flex;
+    background: #e9ecef;
+}
+nav button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+nav button.active {
+    background: #0b5ed7;
+    color: white;
+}
+section {
+    display: none;
+    padding: 20px;
+}
+section.active {
+    display: block;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+th, td {
+    border: 1px solid #333;
+    padding: 5px;
+    text-align: center;
+}
+th {
+    background: #f1f1f1;
+}
+input {
+    width: 100%;
+    border: none;
+    text-align: center;
+    outline: none;
+}
+.total {
+    background: #ffc107;
+    font-weight: bold;
+}
+.month-list button {
+    margin: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>CRM HOÀNG LONG</header>
+
+<nav>
+    <button id="btnInput" class="active">📥 Nhập thông tin</button>
+    <button id="btnLog">📚 Nhật ký</button>
+</nav>
+
+<!-- NHẬP LIỆU -->
+<section id="inputSection" class="active">
+    <h2>
+        BẢNG KÊ THÁNG
+        <input type="month" id="monthPicker">
+    </h2>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Khách hàng</th>
+                <th>Số ĐT</th>
+                <th>Xe</th>
+                <th>Cước vận chuyển</th>
+                <th>KH kê thêm</th>
+                <th>Hạ rỗng</th>
+                <th>Cước cổng</th>
+                <th>Thu tiền</th>
+                <th>Tổng xhd</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot>
+            <tr class="total">
+                <td colspan="7">TỔNG THU</td>
+                <td id="totalMoney">0</td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <br>
+    <button onclick="addRow()">➕ Thêm dòng</button>
+    <button onclick="saveMonth()">💾 Lưu tháng</button>
+</section>
+
+<!-- NHẬT KÝ -->
+<section id="logSection">
+    <h2>📚 NHẬT KÝ THEO THÁNG</h2>
+    <div class="month-list" id="monthList"></div>
+</section>
+
+<script>
+const tableBody = document.getElementById("tableBody");
+const monthPicker = document.getElementById("monthPicker");
+
+document.getElementById("btnInput").onclick = () => showTab(true);
+document.getElementById("btnLog").onclick = () => showTab(false);
+
+function showTab(isInput) {
+    document.getElementById("inputSection").classList.toggle("active", isInput);
+    document.getElementById("logSection").classList.toggle("active", !isInput);
+    document.getElementById("btnInput").classList.toggle("active", isInput);
+    document.getElementById("btnLog").classList.toggle("active", !isInput);
+    if (!isInput) loadLog();
+}
+
+function addRow(data = {}) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td><input value="${data.kh || ''}"></td>
+        <td><input value="${data.dt || ''}"></td>
+        <td><input value="${data.xe || ''}"></td>
+        <td><input class="cuoc" value="${data.cuoc || ''}"></td>
+        <td><input class="kethem" value="${data.kethem || ''}"></td>
+        <td><input value="${data.harong || ''}"></td>
+        <td><input value="${data.cuong || ''}"></td>
+        <td><input class="thu" value="${data.thu || ''}"></td>
+        <td class="tong">0</td>
+        <td><input value="${data.note || ''}"></td>
+    `;
+    tableBody.appendChild(tr);
+
+    tr.querySelectorAll("input").forEach(i => {
+        i.oninput = () => {
+            calculateRow(tr);
+            calculateTotal();
+        };
+    });
+
+    calculateRow(tr);
+}
+
+function calculateRow(tr) {
+    const cuoc = Number(tr.querySelector(".cuoc").value) || 0;
+    const kethem = Number(tr.querySelector(".kethem").value) || 0;
+    tr.querySelector(".tong").textContent = (cuoc + kethem).toLocaleString("vi-VN");
+}
+
+function calculateTotal() {
+    let sum = 0;
+    document.querySelectorAll(".thu").forEach(i => {
+        sum += Number(i.value) || 0;
+    });
+    document.getElementById("totalMoney").textContent = sum.toLocaleString("vi-VN");
+}
+
+function saveMonth() {
+    if (!monthPicker.value) {
+        alert("Chọn tháng trước khi lưu!");
+        return;
+    }
+    const rows = [];
+    document.querySelectorAll("#tableBody tr").forEach(tr => {
+        const inputs = tr.querySelectorAll("input");
+        rows.push({
+            kh: inputs[0].value,
+            dt: inputs[1].value,
+            xe: inputs[2].value,
+            cuoc: inputs[3].value,
+            kethem: inputs[4].value,
+            harong: inputs[5].value,
+            cuong: inputs[6].value,
+            thu: inputs[7].value,
+            note: inputs[8].value
+        });
+    });
+    localStorage.setItem("CRM_" + monthPicker.value, JSON.stringify(rows));
+    alert("Đã lưu tháng " + monthPicker.value);
+}
+
+function loadMonthData(month) {
+    tableBody.innerHTML = "";
+    const data = JSON.parse(localStorage.getItem("CRM_" + month)) || [];
+    if (data.length === 0) addRow();
+    data.forEach(d => addRow(d));
+    calculateTotal();
+}
+
+function loadLog() {
+    const list = document.getElementById("monthList");
+    list.innerHTML = "";
+    Object.keys(localStorage).forEach(k => {
+        if (k.startsWith("CRM_")) {
+            const month = k.replace("CRM_", "");
+            const btn = document.createElement("button");
+            btn.textContent = month;
+            btn.onclick = () => {
+                monthPicker.value = month;
+                showTab(true);
+                loadMonthData(month);
+            };
+            list.appendChild(btn);
+        }
+    });
+}
+
+monthPicker.onchange = () => loadMonthData(monthPicker.value);
+
+addRow();
+</script>
+
+</body>
+</html>
