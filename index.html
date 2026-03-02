@@ -98,6 +98,7 @@ button.action{
     <table>
         <thead>
         <tr>
+            <th>Ngày</th>
             <th>Khách hàng</th>
             <th>Số ĐT</th>
             <th>Xe</th>
@@ -115,7 +116,7 @@ button.action{
 
         <tfoot>
         <tr class="total">
-            <td colspan="7">TỔNG THU</td>
+            <td colspan="8">TỔNG THU</td>
             <td id="tongThu">0</td>
             <td colspan="2"></td>
         </tr>
@@ -137,14 +138,13 @@ button.action{
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
-const tbody=document.getElementById("tbody");
-const monthPicker=document.getElementById("monthPicker");
+const tbody = document.getElementById("tbody");
+const monthPicker = document.getElementById("monthPicker");
 
-btnNhap.onclick=()=>doiTab(true);
-btnNhatKy.onclick=()=>doiTab(false);
+btnNhap.onclick = () => doiTab(true);
+btnNhatKy.onclick = () => doiTab(false);
 
 function doiTab(nhap){
-    nhapSection=nhap;
     document.getElementById("nhap").classList.toggle("active",nhap);
     document.getElementById("nhatky").classList.toggle("active",!nhap);
     btnNhap.classList.toggle("active",nhap);
@@ -154,22 +154,25 @@ function doiTab(nhap){
 
 function themDong(data={}){
     if(daChotThang(monthPicker.value)) return;
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-    <td><input value="${data.kh||''}"></td>
-    <td><input value="${data.dt||''}"></td>
-    <td><input value="${data.xe||''}"></td>
-    <td><input class="cuoc" value="${data.cuoc||''}"></td>
-    <td><input class="kethem" value="${data.kethem||''}"></td>
-    <td><input value="${data.harong||''}"></td>
-    <td><input value="${data.cuoccong||''}"></td>
-    <td><input class="thu" value="${data.thu||''}"></td>
-    <td class="tong">0</td>
-    <td><input value="${data.note||''}"></td>`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td><input type="date" value="${data.ngay || ''}"></td>
+        <td><input value="${data.kh || ''}"></td>
+        <td><input value="${data.dt || ''}"></td>
+        <td><input value="${data.xe || ''}"></td>
+        <td><input class="cuoc" value="${data.cuoc || ''}"></td>
+        <td><input class="kethem" value="${data.kethem || ''}"></td>
+        <td><input value="${data.harong || ''}"></td>
+        <td><input value="${data.cuoccong || ''}"></td>
+        <td><input class="thu" value="${data.thu || ''}"></td>
+        <td class="tong">0</td>
+        <td><input value="${data.note || ''}"></td>
+    `;
     tbody.appendChild(tr);
 
     tr.querySelectorAll("input").forEach(i=>{
-        i.oninput=()=>{
+        i.oninput = ()=>{
             tinhDong(tr);
             tinhTong();
         }
@@ -178,42 +181,58 @@ function themDong(data={}){
 }
 
 function tinhDong(tr){
-    const cuoc=Number(tr.querySelector(".cuoc").value)||0;
-    const kethem=Number(tr.querySelector(".kethem").value)||0;
-    tr.querySelector(".tong").innerText=(cuoc+kethem).toLocaleString("vi-VN");
+    const cuoc = Number(tr.querySelector(".cuoc").value) || 0;
+    const kethem = Number(tr.querySelector(".kethem").value) || 0;
+    tr.querySelector(".tong").innerText =
+        (cuoc + kethem).toLocaleString("vi-VN");
 }
 
 function tinhTong(){
-    let tong=0;
+    let tong = 0;
     document.querySelectorAll(".thu").forEach(i=>{
-        tong+=Number(i.value)||0;
+        tong += Number(i.value) || 0;
     });
-    tongThu.innerText=tong.toLocaleString("vi-VN");
+    tongThu.innerText = tong.toLocaleString("vi-VN");
 }
 
 function luuThang(){
-    if(!monthPicker.value){alert("Chọn tháng trước khi lưu!");return;}
+    if(!monthPicker.value){
+        alert("Chọn tháng trước khi lưu!");
+        return;
+    }
     if(daChotThang(monthPicker.value)){
         alert("Tháng đã CHỐT, không thể lưu!");
         return;
     }
+
     const data=[];
     document.querySelectorAll("#tbody tr").forEach(tr=>{
         const i=tr.querySelectorAll("input");
         data.push({
-            kh:i[0].value,dt:i[1].value,xe:i[2].value,
-            cuoc:i[3].value,kethem:i[4].value,
-            harong:i[5].value,cuoccong:i[6].value,
-            thu:i[7].value,note:i[8].value
+            ngay:i[0].value,
+            kh:i[1].value,
+            dt:i[2].value,
+            xe:i[3].value,
+            cuoc:i[4].value,
+            kethem:i[5].value,
+            harong:i[6].value,
+            cuoccong:i[7].value,
+            thu:i[8].value,
+            note:i[9].value
         });
     });
-    localStorage.setItem("CRM_"+monthPicker.value,JSON.stringify(data));
+
+    localStorage.setItem("CRM_"+monthPicker.value, JSON.stringify(data));
     alert("Đã lưu tháng "+monthPicker.value);
 }
 
 function chotThang(){
-    if(!monthPicker.value){alert("Chọn tháng trước khi chốt!");return;}
-    if(!confirm("Chốt tháng sẽ KHÔNG SỬA được. Tiếp tục?"))return;
+    if(!monthPicker.value){
+        alert("Chọn tháng trước khi chốt!");
+        return;
+    }
+    if(!confirm("Chốt tháng sẽ KHÔNG SỬA được. Tiếp tục?")) return;
+
     localStorage.setItem("LOCK_"+monthPicker.value,"true");
     khoaNhap(true);
     alert("Đã chốt tháng "+monthPicker.value);
@@ -229,7 +248,7 @@ function khoaNhap(khoa){
 
 function taiThang(thang){
     tbody.innerHTML="";
-    const data=JSON.parse(localStorage.getItem("CRM_"+thang))||[];
+    const data = JSON.parse(localStorage.getItem("CRM_"+thang)) || [];
     if(data.length===0) themDong();
     data.forEach(d=>themDong(d));
     tinhTong();
@@ -243,7 +262,7 @@ function taiNhatKy(){
             const thang=k.replace("CRM_","");
             const b=document.createElement("button");
             b.className="month-btn";
-            b.innerText=thang+(daChotThang(thang)?" 🔒":"");
+            b.innerText = thang + (daChotThang(thang)?" 🔒":"");
             b.onclick=()=>{
                 monthPicker.value=thang;
                 doiTab(true);
@@ -255,33 +274,39 @@ function taiNhatKy(){
 }
 
 function xuatExcel(){
-    if(!monthPicker.value){alert("Chọn tháng trước khi xuất!");return;}
+    if(!monthPicker.value){
+        alert("Chọn tháng trước khi xuất!");
+        return;
+    }
+
     const rows=[[
-        "Khách hàng","Số ĐT","Xe","Cước vận chuyển",
-        "KH kê thêm","Hạ rỗng","Cước cổng",
+        "Ngày","Khách hàng","Số ĐT","Xe",
+        "Cước vận chuyển","KH kê thêm",
+        "Hạ rỗng","Cước cổng",
         "Thu tiền","Tổng xhd","Ghi chú"
     ]];
+
     document.querySelectorAll("#tbody tr").forEach(tr=>{
         const i=tr.querySelectorAll("input");
-        const tong=(Number(i[3].value)||0)+(Number(i[4].value)||0);
+        const tong = (Number(i[4].value)||0) + (Number(i[5].value)||0);
         rows.push([
-            i[0].value,i[1].value,i[2].value,
-            i[3].value,i[4].value,
-            i[5].value,i[6].value,
-            i[7].value,tong,i[8].value
+            i[0].value,i[1].value,i[2].value,i[3].value,
+            i[4].value,i[5].value,i[6].value,i[7].value,
+            i[8].value,tong,i[9].value
         ]);
     });
-    const ws=XLSX.utils.aoa_to_sheet(rows);
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,"Thang_"+monthPicker.value);
-    XLSX.writeFile(wb,"CRM_HOANG_LONG_"+monthPicker.value+".xlsx");
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Thang_"+monthPicker.value);
+    XLSX.writeFile(wb, "CRM_HOANG_LONG_"+monthPicker.value+".xlsx");
 }
 
 /* MẶC ĐỊNH THÁNG HIỆN TẠI */
-const now=new Date();
-monthPicker.value=now.toISOString().slice(0,7);
+const now = new Date();
+monthPicker.value = now.toISOString().slice(0,7);
 taiThang(monthPicker.value);
-monthPicker.onchange=()=>taiThang(monthPicker.value);
+monthPicker.onchange = () => taiThang(monthPicker.value);
 </script>
 
 </body>
