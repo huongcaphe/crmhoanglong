@@ -4,309 +4,224 @@
 <meta charset="UTF-8">
 <title>CRM HOÀNG LONG</title>
 
+<!-- XLSX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body{
-    font-family:"Times New Roman";
-    margin:0;
-    background:#f2f2f2;
-}
-header{
-    background:#0b3c78;
-    color:#fff;
-    padding:15px;
-    text-align:center;
-    font-size:28px;
-    font-weight:bold;
-}
-nav{
-    display:flex;
-    background:#ddd;
-}
-nav button{
-    flex:1;
-    padding:12px;
-    font-size:16px;
-    border:none;
-    cursor:pointer;
-}
-nav button.active{
-    background:#0b3c78;
-    color:white;
-}
-section{
-    display:none;
-    padding:20px;
-}
-section.active{
-    display:block;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-}
-th,td{
-    border:1px solid #333;
-    padding:5px;
-    text-align:center;
-}
-th{
-    background:#e0e0e0;
-}
-input{
-    width:100%;
-    border:none;
-    text-align:center;
-    outline:none;
-}
-input:disabled{
-    background:#f5f5f5;
-}
-.total{
-    background:#f4c430;
-    font-weight:bold;
-}
-button.action{
-    padding:8px 14px;
-    margin:10px 5px 0 0;
-    font-size:15px;
-}
-.month-btn{
-    padding:8px 12px;
-    margin:5px;
-}
+body{font-family:Times New Roman;margin:0;background:#f4f4f4}
+header{background:#0b3c73;color:white;text-align:center;padding:15px;font-size:26px}
+nav{display:flex;background:#ddd}
+nav button{flex:1;padding:10px;border:none;font-size:16px;cursor:pointer}
+nav button.active{background:#0b3c73;color:white}
+.container{padding:20px}
+table{width:100%;border-collapse:collapse;background:white}
+th,td{border:1px solid #999;padding:4px;text-align:center}
+th{background:#ddd}
+input{width:100%;border:none;text-align:center}
+input:disabled{background:#eee}
+tfoot td{background:#f7c934;font-weight:bold}
+.actions button{margin:5px;padding:8px 12px}
+.hidden{display:none}
+.lock{color:red;font-weight:bold;margin-left:10px}
+.login-box{max-width:300px;margin:100px auto;background:white;padding:20px;border-radius:6px}
+.login-box input{width:100%;padding:8px;margin:5px 0}
 </style>
 </head>
 
 <body>
 
-<header>CRM HOÀNG LONG</header>
+<!-- LOGIN -->
+<div id="login" class="login-box">
+<h2>ĐĂNG NHẬP CRM</h2>
+<input id="user" placeholder="Tên đăng nhập">
+<input id="pass" type="password" placeholder="Mật khẩu">
+<button onclick="login()">Đăng nhập</button>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+<header>
+CRM HOÀNG LONG
+<button style="float:right" onclick="logout()">Đăng xuất</button>
+</header>
 
 <nav>
-    <button id="btnNhap" class="active">📥 Nhập thông tin</button>
-    <button id="btnNhatKy">📚 Nhật ký</button>
+<button class="active" onclick="showTab('nhap')">📥 Nhập</button>
+<button onclick="showTab('nhatky')">📚 Nhật ký</button>
+<button onclick="showTab('chart')">📊 Biểu đồ</button>
 </nav>
 
-<!-- NHẬP LIỆU -->
-<section id="nhap" class="active">
-    <h2>
-        BẢNG KÊ THÁNG:
-        <input type="month" id="monthPicker"
-               style="font-size:16px;padding:5px;margin-left:10px;">
-    </h2>
+<div class="container">
 
-    <table>
-        <thead>
-        <tr>
-            <th>Ngày</th>
-            <th>Khách hàng</th>
-            <th>Số ĐT</th>
-            <th>Xe</th>
-            <th>Cước vận chuyển</th>
-            <th>KH kê thêm</th>
-            <th>Hạ rỗng</th>
-            <th>Cước cổng</th>
-            <th>Thu tiền</th>
-            <th>Tổng xhd</th>
-            <th>Ghi chú</th>
-        </tr>
-        </thead>
+<!-- NHẬP -->
+<div id="nhap">
+<h2>BẢNG KÊ THÁNG:
+<input type="month" id="monthPicker">
+<span id="lockStatus" class="lock"></span>
+</h2>
 
-        <tbody id="tbody"></tbody>
+<table>
+<thead>
+<tr>
+<th>Ngày</th><th>Khách</th><th>SĐT</th><th>Xe</th>
+<th>Cước VC</th><th>Kè thêm</th><th>Hạ rỗng</th>
+<th>Cước công</th><th>Thu</th><th>XHD</th><th>Ghi chú</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+<tfoot>
+<tr><td colspan="8">TỔNG THU</td><td id="tongThu">0</td><td colspan="2"></td></tr>
+</tfoot>
+</table>
 
-        <tfoot>
-        <tr class="total">
-            <td colspan="8">TỔNG THU</td>
-            <td id="tongThu">0</td>
-            <td colspan="2"></td>
-        </tr>
-        </tfoot>
-    </table>
-
-    <button class="action" onclick="themDong()">➕ Thêm dòng</button>
-    <button class="action" onclick="luuThang()">💾 Lưu tháng</button>
-    <button class="action" onclick="chotThang()">🔒 Chốt tháng</button>
-    <button class="action" onclick="xuatExcel()">📤 Xuất Excel</button>
-</section>
+<div class="actions">
+<button onclick="themDong()">➕ Thêm dòng</button>
+<button onclick="luuThang()">💾 Lưu</button>
+<button onclick="chotThang()">🔒 Chốt</button>
+<button onclick="xuatExcel()">📤 Excel</button>
+</div>
+</div>
 
 <!-- NHẬT KÝ -->
-<section id="nhatky">
-    <h2>📚 NHẬT KÝ THEO THÁNG</h2>
-    <div id="dsThang"></div>
-</section>
+<div id="nhatky" class="hidden">
+<h2>NHẬT KÝ</h2>
+<ul id="listThang"></ul>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- BIỂU ĐỒ -->
+<div id="chart" class="hidden">
+<h2>BIỂU ĐỒ DOANH THU</h2>
+<canvas id="chartNgay"></canvas>
+<br>
+<canvas id="chartThang"></canvas>
+</div>
+
+</div>
+</div>
 
 <script>
-const tbody = document.getElementById("tbody");
-const monthPicker = document.getElementById("monthPicker");
-
-btnNhap.onclick = () => doiTab(true);
-btnNhatKy.onclick = () => doiTab(false);
-
-function doiTab(nhap){
-    document.getElementById("nhap").classList.toggle("active",nhap);
-    document.getElementById("nhatky").classList.toggle("active",!nhap);
-    btnNhap.classList.toggle("active",nhap);
-    btnNhatKy.classList.toggle("active",!nhap);
-    if(!nhap) taiNhatKy();
+/* LOGIN */
+function login(){
+if(user.value==="admin" && pass.value==="vthoanglong"){
+localStorage.setItem("LOGIN","admin");
+location.reload();
+}else alert("Sai tài khoản");
+}
+function logout(){localStorage.removeItem("LOGIN");location.reload();}
+if(localStorage.getItem("LOGIN")==="admin"){
+login.style.display="none";
+app.classList.remove("hidden");
 }
 
-function themDong(data={}){
-    if(daChotThang(monthPicker.value)) return;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td><input type="date" value="${data.ngay || ''}"></td>
-        <td><input value="${data.kh || ''}"></td>
-        <td><input value="${data.dt || ''}"></td>
-        <td><input value="${data.xe || ''}"></td>
-        <td><input class="cuoc" value="${data.cuoc || ''}"></td>
-        <td><input class="kethem" value="${data.kethem || ''}"></td>
-        <td><input value="${data.harong || ''}"></td>
-        <td><input value="${data.cuoccong || ''}"></td>
-        <td><input class="thu" value="${data.thu || ''}"></td>
-        <td class="tong">0</td>
-        <td><input value="${data.note || ''}"></td>
-    `;
-    tbody.appendChild(tr);
-
-    tr.querySelectorAll("input").forEach(i=>{
-        i.oninput = ()=>{
-            tinhDong(tr);
-            tinhTong();
-        }
-    });
-    tinhDong(tr);
+/* TAB */
+function showTab(id){
+["nhap","nhatky","chart"].forEach(t=>document.getElementById(t).classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+if(id==="nhatky")loadNhatKy();
+if(id==="chart")loadChart();
 }
 
-function tinhDong(tr){
-    const cuoc = Number(tr.querySelector(".cuoc").value) || 0;
-    const kethem = Number(tr.querySelector(".kethem").value) || 0;
-    tr.querySelector(".tong").innerText =
-        (cuoc + kethem).toLocaleString("vi-VN");
+/* DATA */
+const tbody=document.getElementById("tbody");
+const monthPicker=document.getElementById("monthPicker");
+const tongThuEl=document.getElementById("tongThu");
+const lockStatus=document.getElementById("lockStatus");
+
+function themDong(d={}){
+const tr=document.createElement("tr");
+tr.innerHTML=`
+<td><input type="date" value="${d.ngay||''}"></td>
+<td><input value="${d.kh||''}"></td>
+<td><input value="${d.dt||''}"></td>
+<td><input value="${d.xe||''}"></td>
+<td><input value="${d.cuoc||0}"></td>
+<td><input value="${d.ke||0}"></td>
+<td><input value="${d.ha||0}"></td>
+<td><input value="${d.cong||0}"></td>
+<td><input class="thu" value="${d.thu||0}"></td>
+<td><input value="${d.xhd||0}"></td>
+<td><input value="${d.note||''}"></td>`;
+tbody.appendChild(tr);
+tr.querySelector(".thu").oninput=calcTong;
+calcTong();
 }
 
-function tinhTong(){
-    let tong = 0;
-    document.querySelectorAll(".thu").forEach(i=>{
-        tong += Number(i.value) || 0;
-    });
-    tongThu.innerText = tong.toLocaleString("vi-VN");
+function calcTong(){
+let s=0;
+document.querySelectorAll(".thu").forEach(i=>s+=Number(i.value||0));
+tongThuEl.innerText=s.toLocaleString();
 }
 
 function luuThang(){
-    if(!monthPicker.value){
-        alert("Chọn tháng trước khi lưu!");
-        return;
-    }
-    if(daChotThang(monthPicker.value)){
-        alert("Tháng đã CHỐT, không thể lưu!");
-        return;
-    }
+if(!monthPicker.value)return alert("Chọn tháng");
+const arr=[];
+tbody.querySelectorAll("tr").forEach(tr=>{
+const i=tr.querySelectorAll("input");
+arr.push({ngay:i[0].value,kh:i[1].value,dt:i[2].value,xe:i[3].value,
+cuoc:i[4].value,ke:i[5].value,ha:i[6].value,cong:i[7].value,
+thu:i[8].value,xhd:i[9].value,note:i[10].value});
+});
+localStorage.setItem("DATA_"+monthPicker.value,JSON.stringify(arr));
+alert("Đã lưu");
+}
 
-    const data=[];
-    document.querySelectorAll("#tbody tr").forEach(tr=>{
-        const i=tr.querySelectorAll("input");
-        data.push({
-            ngay:i[0].value,
-            kh:i[1].value,
-            dt:i[2].value,
-            xe:i[3].value,
-            cuoc:i[4].value,
-            kethem:i[5].value,
-            harong:i[6].value,
-            cuoccong:i[7].value,
-            thu:i[8].value,
-            note:i[9].value
-        });
-    });
-
-    localStorage.setItem("CRM_"+monthPicker.value, JSON.stringify(data));
-    alert("Đã lưu tháng "+monthPicker.value);
+function taiThang(m){
+tbody.innerHTML="";
+(JSON.parse(localStorage.getItem("DATA_"+m)||"[]")).forEach(d=>themDong(d));
+const locked=localStorage.getItem("LOCK_"+m);
+lockStatus.innerText=locked?"🔒 ĐÃ CHỐT":"";
+tbody.querySelectorAll("input").forEach(i=>i.disabled=locked);
+calcTong();
 }
 
 function chotThang(){
-    if(!monthPicker.value){
-        alert("Chọn tháng trước khi chốt!");
-        return;
-    }
-    if(!confirm("Chốt tháng sẽ KHÔNG SỬA được. Tiếp tục?")) return;
-
-    localStorage.setItem("LOCK_"+monthPicker.value,"true");
-    khoaNhap(true);
-    alert("Đã chốt tháng "+monthPicker.value);
-}
-
-function daChotThang(thang){
-    return localStorage.getItem("LOCK_"+thang)==="true";
-}
-
-function khoaNhap(khoa){
-    document.querySelectorAll("input").forEach(i=>i.disabled=khoa);
-}
-
-function taiThang(thang){
-    tbody.innerHTML="";
-    const data = JSON.parse(localStorage.getItem("CRM_"+thang)) || [];
-    if(data.length===0) themDong();
-    data.forEach(d=>themDong(d));
-    tinhTong();
-    khoaNhap(daChotThang(thang));
-}
-
-function taiNhatKy(){
-    dsThang.innerHTML="";
-    Object.keys(localStorage).forEach(k=>{
-        if(k.startsWith("CRM_")){
-            const thang=k.replace("CRM_","");
-            const b=document.createElement("button");
-            b.className="month-btn";
-            b.innerText = thang + (daChotThang(thang)?" 🔒":"");
-            b.onclick=()=>{
-                monthPicker.value=thang;
-                doiTab(true);
-                taiThang(thang);
-            }
-            dsThang.appendChild(b);
-        }
-    });
-}
-
-function xuatExcel(){
-    if(!monthPicker.value){
-        alert("Chọn tháng trước khi xuất!");
-        return;
-    }
-
-    const rows=[[
-        "Ngày","Khách hàng","Số ĐT","Xe",
-        "Cước vận chuyển","KH kê thêm",
-        "Hạ rỗng","Cước cổng",
-        "Thu tiền","Tổng xhd","Ghi chú"
-    ]];
-
-    document.querySelectorAll("#tbody tr").forEach(tr=>{
-        const i=tr.querySelectorAll("input");
-        const tong = (Number(i[4].value)||0) + (Number(i[5].value)||0);
-        rows.push([
-            i[0].value,i[1].value,i[2].value,i[3].value,
-            i[4].value,i[5].value,i[6].value,i[7].value,
-            i[8].value,tong,i[9].value
-        ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Thang_"+monthPicker.value);
-    XLSX.writeFile(wb, "CRM_HOANG_LONG_"+monthPicker.value+".xlsx");
-}
-
-/* MẶC ĐỊNH THÁNG HIỆN TẠI */
-const now = new Date();
-monthPicker.value = now.toISOString().slice(0,7);
+if(!confirm("Chốt & khóa?"))return;
+luuThang();
+localStorage.setItem("LOCK_"+monthPicker.value,"1");
 taiThang(monthPicker.value);
-monthPicker.onchange = () => taiThang(monthPicker.value);
+}
+
+monthPicker.onchange=()=>taiThang(monthPicker.value);
+
+/* NHẬT KÝ */
+function loadNhatKy(){
+listThang.innerHTML="";
+Object.keys(localStorage).forEach(k=>{
+if(k.startsWith("DATA_")){
+const m=k.replace("DATA_","");
+listThang.innerHTML+=`<li><a href="#" onclick="monthPicker.value='${m}';showTab('nhap');taiThang('${m}')">${m}</a></li>`;
+}});
+}
+
+/* EXCEL */
+function xuatExcel(){
+const wb=XLSX.utils.book_new();
+const ws=[["Ngày","Khách","SĐT","Xe","VC","Kè","Hạ","Công","Thu","XHD","Note"]];
+tbody.querySelectorAll("tr").forEach(tr=>ws.push([...tr.querySelectorAll("input")].map(i=>i.value)));
+XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ws),"DATA");
+XLSX.writeFile(wb,"CRM_"+monthPicker.value+".xlsx");
+}
+
+/* CHART */
+function loadChart(){
+const days={},months={};
+Object.keys(localStorage).forEach(k=>{
+if(k.startsWith("DATA_")){
+const m=k.replace("DATA_","");
+let total=0;
+JSON.parse(localStorage.getItem(k)).forEach(d=>{
+total+=Number(d.thu||0);
+days[d.ngay]=(days[d.ngay]||0)+Number(d.thu||0);
+});
+months[m]=total;
+}});
+new Chart(chartNgay,{type:"bar",data:{labels:Object.keys(days),datasets:[{label:"Theo ngày",data:Object.values(days)}]}});
+new Chart(chartThang,{type:"line",data:{labels:Object.keys(months),datasets:[{label:"Theo tháng",data:Object.values(months)}]}});
+}
 </script>
 
 </body>
