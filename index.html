@@ -3,24 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản Lý Doanh Thu</title>
+<title>CRM Hoàng Long</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
-    font-family: Arial, sans-serif;
     margin:0;
+    font-family:Arial, sans-serif;
     background:#f4f6f9;
 }
 header{
     background:linear-gradient(90deg,#0f2f5f,#1f4c8f);
     color:white;
     padding:15px 25px;
-    font-size:22px;
     display:flex;
     justify-content:space-between;
+    align-items:center;
+}
+nav{
+    background:#163d73;
+    display:flex;
+}
+nav button{
+    flex:1;
+    padding:12px;
+    border:none;
+    background:#163d73;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+nav button.active{
+    background:#1f4c8f;
 }
 .container{ padding:20px; }
 
@@ -29,12 +45,11 @@ button{
     border:none;
     border-radius:6px;
     cursor:pointer;
-    font-weight:500;
 }
 .btn-primary{background:#1f4c8f;color:white;}
+.btn-success{background:#28a745;color:white;}
 .btn-danger{background:#d9534f;color:white;}
 .btn-warning{background:#f0ad4e;color:white;}
-.btn-success{background:#28a745;color:white;}
 
 table{
     width:100%;
@@ -58,14 +73,10 @@ th{ background:#e9ecef; }
 }
 .total-box span{
     color:#e67e22;
-    font-weight:bold;
     font-size:26px;
+    font-weight:bold;
 }
-input{
-    width:100%;
-    padding:6px;
-    box-sizing:border-box;
-}
+
 .login-box{
     max-width:320px;
     margin:120px auto;
@@ -74,25 +85,11 @@ input{
     border-radius:10px;
     box-shadow:0 0 15px rgba(0,0,0,0.1);
 }
-.hidden{display:none;}
 
-.month-box{
-    font-size:20px;
-    padding:6px;
-    margin:10px 0;
-}
-.log-box{
-    background:white;
-    padding:15px;
-    margin-top:20px;
-    border-radius:8px;
-}
-canvas{
-    background:white;
-    margin-top:20px;
-    padding:15px;
-    border-radius:8px;
-}
+.hidden{display:none;}
+canvas{background:white;padding:15px;border-radius:8px;}
+.log-box{background:white;padding:15px;border-radius:8px;margin-top:20px;}
+input{padding:6px;width:100%;box-sizing:border-box;}
 </style>
 </head>
 
@@ -110,13 +107,19 @@ canvas{
 <div id="mainPage" class="hidden">
 
 <header>
-    <div>QUẢN LÝ DOANH THU</div>
+    <div>CRM HOÀNG LONG</div>
     <button class="btn-danger" onclick="logout()">Đăng xuất</button>
 </header>
 
-<div class="container">
+<nav>
+    <button id="menu1" class="active" onclick="showPage('page1')">Quản lý doanh thu</button>
+    <button id="menu2" onclick="showPage('page2')">Nhật ký & Biểu đồ</button>
+</nav>
 
-<input type="month" id="monthPicker" class="month-box" onchange="loadData()">
+<!-- PAGE 1 -->
+<div id="page1" class="container">
+
+<input type="month" id="monthPicker" onchange="loadData()">
 
 <div class="total-box">
 TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
@@ -134,7 +137,7 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 <th>Ngày</th>
 <th>Khách hàng</th>
 <th>Cước VC</th>
-<th>KH kè thêm</th>
+<th>KH kê thêm</th>
 <th>Hạ rỗng</th>
 <th>Cước công</th>
 <th>Thu tiền</th>
@@ -145,16 +148,21 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 <tbody></tbody>
 </table>
 
-<!-- BIỂU ĐỒ -->
+</div>
+
+<!-- PAGE 2 -->
+<div id="page2" class="container hidden">
+
+<h2>Biểu đồ doanh thu</h2>
 <canvas id="revenueChart" height="100"></canvas>
 
-<!-- NHẬT KÝ -->
 <div class="log-box">
 <h3>Nhật ký tháng</h3>
 <ul id="monthLog"></ul>
 </div>
 
 </div>
+
 </div>
 
 <script>
@@ -174,8 +182,21 @@ function login(){
     }
 }
 
-function logout(){
-    location.reload();
+function logout(){ location.reload(); }
+
+function showPage(page){
+    page1.classList.add("hidden");
+    page2.classList.add("hidden");
+    menu1.classList.remove("active");
+    menu2.classList.remove("active");
+
+    document.getElementById(page).classList.remove("hidden");
+
+    if(page==="page1") menu1.classList.add("active");
+    else menu2.classList.add("active");
+
+    updateChart();
+    updateLog();
 }
 
 function formatMoney(input){
@@ -187,7 +208,6 @@ function formatMoney(input){
 function addRow(data={}){
     const tbody=document.querySelector("#dataTable tbody");
     let row=tbody.insertRow();
-
     row.innerHTML=`
     <td><input type="date" value="${data.date||''}"></td>
     <td><input value="${data.customer||''}"></td>
@@ -208,7 +228,6 @@ function calculateTotal(){
         total+=Number(val)||0;
     });
     totalRevenue.textContent=total.toLocaleString();
-    updateChart();
 }
 
 function saveData(){
@@ -226,7 +245,7 @@ function saveData(){
         });
     });
     localStorage.setItem(monthPicker.value,JSON.stringify(data));
-    alert("Đã lưu dữ liệu");
+    alert("Đã lưu");
 }
 
 function loadData(){
@@ -234,7 +253,6 @@ function loadData(){
     let data=JSON.parse(localStorage.getItem(monthPicker.value))||[];
     data.forEach(d=>addRow(d));
     calculateTotal();
-    updateLog();
 }
 
 function lockMonth(){
@@ -244,7 +262,7 @@ function lockMonth(){
 
 function exportExcel(){
     let wb=XLSX.utils.book_new();
-    let ws_data=[["Ngày","Khách hàng","Cước VC","KH kè thêm","Hạ rỗng","Cước công","Thu tiền","XHD"]];
+    let ws_data=[["Ngày","Khách hàng","Cước VC","KH kê thêm","Hạ rỗng","Cước công","Thu tiền","XHD"]];
     document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
         ws_data.push([
             row.cells[0].querySelector("input").value,
@@ -276,10 +294,9 @@ function updateChart(){
 }
 
 function updateLog(){
-    let log=document.getElementById("monthLog");
-    log.innerHTML="";
-    log.innerHTML+="<li>Tháng: "+monthPicker.value+"</li>";
-    log.innerHTML+="<li>Tổng doanh thu: "+totalRevenue.textContent+" VNĐ</li>";
+    monthLog.innerHTML="";
+    monthLog.innerHTML+="<li>Tháng: "+monthPicker.value+"</li>";
+    monthLog.innerHTML+="<li>Tổng doanh thu: "+totalRevenue.textContent+" VNĐ</li>";
 }
 
 </script>
