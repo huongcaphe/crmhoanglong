@@ -137,7 +137,7 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 <th>Ngày</th>
 <th>Khách hàng</th>
 <th>Cước VC</th>
-<th>KH kê thêm</th>
+<th>KH kè thêm</th>
 <th>Hạ rỗng</th>
 <th>Cước công</th>
 <th>Thu tiền</th>
@@ -208,8 +208,9 @@ function formatMoney(input){
 function addRow(data={}){
     const tbody=document.querySelector("#dataTable tbody");
     let row=tbody.insertRow();
+
     row.innerHTML=`
-    <td><input type="date" value="${data.date||''}"></td>
+    <td><input type="date" value="${data.date||new Date().toISOString().split('T')[0]}"></td>
     <td><input value="${data.customer||''}"></td>
     <td><input oninput="formatMoney(this)" value="${data.vc||''}"></td>
     <td><input oninput="formatMoney(this)" value="${data.extra||''}"></td>
@@ -249,9 +250,15 @@ function saveData(){
 }
 
 function loadData(){
-    document.querySelector("#dataTable tbody").innerHTML="";
+    const tbody=document.querySelector("#dataTable tbody");
+    tbody.innerHTML="";
     let data=JSON.parse(localStorage.getItem(monthPicker.value))||[];
-    data.forEach(d=>addRow(d));
+
+    if(data.length===0){
+        addRow();
+    }else{
+        data.forEach(d=>addRow(d));
+    }
     calculateTotal();
 }
 
@@ -262,7 +269,7 @@ function lockMonth(){
 
 function exportExcel(){
     let wb=XLSX.utils.book_new();
-    let ws_data=[["Ngày","Khách hàng","Cước VC","KH kê thêm","Hạ rỗng","Cước công","Thu tiền","XHD"]];
+    let ws_data=[["Ngày","Khách hàng","Cước VC","KH kè thêm","Hạ rỗng","Cước công","Thu tiền","XHD"]];
     document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
         ws_data.push([
             row.cells[0].querySelector("input").value,
@@ -277,7 +284,7 @@ function exportExcel(){
     });
     let ws=XLSX.utils.aoa_to_sheet(ws_data);
     XLSX.utils.book_append_sheet(wb,ws,"DoanhThu");
-    XLSX.writeFile(wb,"DoanhThu.xlsx");
+    XLSX.writeFile(wb,"DoanhThu_"+monthPicker.value+".xlsx");
 }
 
 function updateChart(){
