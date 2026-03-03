@@ -2,263 +2,316 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>CRM HOÀNG LONG</title>
-
-<!-- XLSX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<!-- CHART -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Quản Lý Doanh Thu</title>
 
 <style>
-body{margin:0;font-family:Times New Roman;background:#f4f4f4}
-header{background:#0b3c73;color:white;text-align:center;padding:15px;font-size:26px}
-nav{display:flex;background:#ddd}
-nav button{flex:1;padding:10px;border:none;font-size:16px;cursor:pointer}
-nav button.active{background:#0b3c73;color:white}
-.container{padding:20px}
-table{width:100%;border-collapse:collapse;background:white}
-th,td{border:1px solid #999;padding:4px;text-align:center}
-th{background:#ddd}
-input{width:100%;border:none;text-align:center}
-input:disabled{background:#eee}
-tfoot td{background:#f7c934;font-weight:bold}
-.actions button{margin:5px;padding:8px 12px}
-.hidden{display:none}
-.lock{color:red;font-weight:bold;margin-left:10px}
-.login-box{
-max-width:320px;margin:120px auto;
-background:white;padding:20px;border-radius:6px;
-box-shadow:0 0 10px rgba(0,0,0,0.1)
+body{
+margin:0;
+font-family:'Segoe UI',Tahoma;
+background:#f2f4f8;
 }
-.login-box h2{text-align:center}
-.login-box input{width:100%;padding:8px;margin:6px 0}
-.login-box button{width:100%;padding:8px}
+
+header{
+background:linear-gradient(90deg,#0b3c73,#124d99);
+color:white;
+padding:18px;
+font-size:26px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.container{
+padding:20px;
+}
+
+.month-bar{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:20px;
+flex-wrap:wrap;
+}
+
+.month-bar input{
+padding:8px 12px;
+font-size:16px;
+border:2px solid #0b3c73;
+border-radius:6px;
+}
+
+button{
+padding:6px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#0b3c73;
+color:white;
+}
+
+button:hover{opacity:0.85}
+
+.summary{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+margin-bottom:20px;
+font-size:18px;
+}
+
+.summary span{
+font-size:24px;
+font-weight:bold;
+color:#e67e22;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+th,td{
+border:1px solid #ddd;
+padding:6px;
+text-align:center;
+}
+
+th{
+background:#f0f4ff;
+}
+
+.money{
+text-align:right;
+}
+
+.negative{
+color:red;
+font-weight:bold;
+}
+
+.profit{
+text-align:right;
+font-weight:bold;
+}
+
+tfoot td{
+background:#ffe082;
+font-weight:bold;
+}
+
+.lock{
+color:red;
+font-weight:bold;
+margin-left:15px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="login-box">
-<h2>ĐĂNG NHẬP CRM</h2>
-<input id="user" placeholder="Tên đăng nhập">
-<input id="pass" type="password" placeholder="Mật khẩu">
-<button onclick="login()">Đăng nhập</button>
-</div>
-
-<!-- APP -->
-<div id="app" class="hidden">
-
 <header>
-CRM HOÀNG LONG
-<button style="float:right" onclick="logout()">Đăng xuất</button>
+QUẢN LÝ DOANH THU
 </header>
-
-<nav>
-<button id="tabNhap" class="active" onclick="showTab('nhap')">📥 Nhập</button>
-<button id="tabNhatKy" onclick="showTab('nhatky')">📚 Nhật ký</button>
-<button id="tabChart" onclick="showTab('chart')">📊 Biểu đồ</button>
-</nav>
 
 <div class="container">
 
-<!-- NHẬP -->
-<div id="nhap">
-<h2>
-BẢNG KÊ THÁNG:
+<div class="month-bar">
+<button onclick="prevMonth()">◀</button>
 <input type="month" id="monthPicker">
+<button onclick="nextMonth()">▶</button>
 <span id="lockStatus" class="lock"></span>
-</h2>
+</div>
+
+<div class="summary">
+TỔNG DOANH THU: <span id="tongThuTop">0</span> VNĐ
+</div>
+
+<button onclick="themDong()">+ Thêm dòng</button>
+<button onclick="luuThang()">💾 Lưu</button>
+<button onclick="khoaThang()">🔒 Khóa tháng</button>
+
+<br><br>
 
 <table>
 <thead>
 <tr>
 <th>Ngày</th>
 <th>Khách hàng</th>
-<th>SĐT</th>
-<th>Xe</th>
 <th>Cước VC</th>
 <th>KH kè thêm</th>
 <th>Hạ rỗng</th>
 <th>Cước công</th>
 <th>Thu tiền</th>
 <th>XHD</th>
-<th>Ghi chú</th>
+<th>Lợi nhuận</th>
+<th>Xóa</th>
 </tr>
 </thead>
+
 <tbody id="tbody"></tbody>
+
 <tfoot>
 <tr>
-<td colspan="8">TỔNG THU</td>
+<td colspan="6">TỔNG</td>
 <td id="tongThu">0</td>
-<td colspan="2"></td>
+<td></td>
+<td id="tongLoiNhuan">0</td>
+<td></td>
 </tr>
 </tfoot>
 </table>
 
-<div class="actions">
-<button onclick="themDong()">➕ Thêm dòng</button>
-<button onclick="luuThang()">💾 Lưu tháng</button>
-<button onclick="chotThang()">🔒 Chốt tháng</button>
-<button onclick="xuatExcel()">📤 Xuất Excel</button>
-</div>
-</div>
-
-<!-- NHẬT KÝ -->
-<div id="nhatky" class="hidden">
-<h2>NHẬT KÝ THÁNG</h2>
-<ul id="listThang"></ul>
-</div>
-
-<!-- BIỂU ĐỒ -->
-<div id="chart" class="hidden">
-<h2>BIỂU ĐỒ DOANH THU</h2>
-<canvas id="chartNgay"></canvas>
-<br><br>
-<canvas id="chartThang"></canvas>
-</div>
-
-</div>
 </div>
 
 <script>
-/* ========= LOGIN ========= */
-function login(){
-const u=document.getElementById("user").value.trim();
-const p=document.getElementById("pass").value.trim();
-if(u==="admin" && p==="vthoanglong"){
-localStorage.setItem("LOGIN","admin");
-location.reload();
-}else alert("Sai tên đăng nhập hoặc mật khẩu");
-}
-function logout(){
-localStorage.removeItem("LOGIN");
-location.reload();
-}
-if(localStorage.getItem("LOGIN")==="admin"){
-document.getElementById("loginBox").style.display="none";
-document.getElementById("app").classList.remove("hidden");
-}
 
-/* ========= TAB ========= */
-function showTab(tab){
-["nhap","nhatky","chart"].forEach(id=>{
-document.getElementById(id).classList.add("hidden");
-});
-document.getElementById(tab).classList.remove("hidden");
-if(tab==="nhatky")loadNhatKy();
-if(tab==="chart")loadChart();
-}
-
-/* ========= DATA ========= */
-const tbody=document.getElementById("tbody");
 const monthPicker=document.getElementById("monthPicker");
-const tongThuEl=document.getElementById("tongThu");
+const tbody=document.getElementById("tbody");
+const tongThu=document.getElementById("tongThu");
+const tongThuTop=document.getElementById("tongThuTop");
+const tongLoiNhuan=document.getElementById("tongLoiNhuan");
 const lockStatus=document.getElementById("lockStatus");
 
-function themDong(d={}){
-const tr=document.createElement("tr");
+function formatMoney(val){
+if(!val) return "";
+return Number(val).toLocaleString("en-US");
+}
+
+function unformatMoney(val){
+return Number(val.replace(/,/g,""))||0;
+}
+
+function themDong(data={}){
+let tr=document.createElement("tr");
 tr.innerHTML=`
-<td><input type="date" value="${d.ngay||''}"></td>
-<td><input value="${d.kh||''}"></td>
-<td><input value="${d.dt||''}"></td>
-<td><input value="${d.xe||''}"></td>
-<td><input value="${d.cuoc||0}"></td>
-<td><input value="${d.ke||0}"></td>
-<td><input value="${d.ha||0}"></td>
-<td><input value="${d.cong||0}"></td>
-<td><input class="thu" value="${d.thu||0}"></td>
-<td><input value="${d.xhd||0}"></td>
-<td><input value="${d.note||''}"></td>`;
+<td><input type="date" value="${data.ngay||""}"></td>
+<td><input value="${data.kh||""}"></td>
+<td><input class="money cost" value="${formatMoney(data.cuoc)}"></td>
+<td><input class="money cost" value="${formatMoney(data.ke)}"></td>
+<td><input class="money cost" value="${formatMoney(data.ha)}"></td>
+<td><input class="money cost" value="${formatMoney(data.cong)}"></td>
+<td><input class="money thu" value="${formatMoney(data.thu)}"></td>
+<td><input class="money" value="${formatMoney(data.xhd)}"></td>
+<td class="profit">0</td>
+<td><button onclick="xoaDong(this)">X</button></td>
+`;
 tbody.appendChild(tr);
-tr.querySelector(".thu").oninput=calcTong;
+updateRowProfit(tr);
+}
+
+function xoaDong(btn){
+btn.closest("tr").remove();
 calcTong();
+}
+
+document.addEventListener("input",function(e){
+if(e.target.classList.contains("money")){
+let value=e.target.value.replace(/,/g,"").replace(/\D/g,"");
+e.target.value=value?Number(value).toLocaleString("en-US"):"";
+updateRowProfit(e.target.closest("tr"));
+calcTong();
+}
+});
+
+function updateRowProfit(tr){
+let inputs=tr.querySelectorAll("input");
+let cuoc=unformatMoney(inputs[2].value);
+let ke=unformatMoney(inputs[3].value);
+let ha=unformatMoney(inputs[4].value);
+let cong=unformatMoney(inputs[5].value);
+let thu=unformatMoney(inputs[6].value);
+
+let profit=thu-(cuoc+ke+ha+cong);
+
+let profitCell=tr.querySelector(".profit");
+profitCell.innerText=profit.toLocaleString("en-US");
+
+if(profit<0){
+profitCell.classList.add("negative");
+}else{
+profitCell.classList.remove("negative");
+}
 }
 
 function calcTong(){
-let sum=0;
-document.querySelectorAll(".thu").forEach(i=>sum+=Number(i.value||0));
-tongThuEl.innerText=sum.toLocaleString();
+let sumThu=0;
+let sumProfit=0;
+
+document.querySelectorAll("#tbody tr").forEach(tr=>{
+let thu=unformatMoney(tr.querySelector(".thu")?.value||"0");
+sumThu+=thu;
+
+let profit=Number(tr.querySelector(".profit")?.innerText.replace(/,/g,"")||0);
+sumProfit+=profit;
+});
+
+tongThu.innerText=sumThu.toLocaleString("en-US");
+tongThuTop.innerText=sumThu.toLocaleString("en-US");
+tongLoiNhuan.innerText=sumProfit.toLocaleString("en-US");
 }
 
 function luuThang(){
-if(!monthPicker.value)return alert("Chọn tháng");
-const arr=[];
-tbody.querySelectorAll("tr").forEach(tr=>{
-const i=tr.querySelectorAll("input");
-arr.push({
-ngay:i[0].value,kh:i[1].value,dt:i[2].value,xe:i[3].value,
-cuoc:i[4].value,ke:i[5].value,ha:i[6].value,cong:i[7].value,
-thu:i[8].value,xhd:i[9].value,note:i[10].value
+let data=[];
+document.querySelectorAll("#tbody tr").forEach(tr=>{
+let i=tr.querySelectorAll("input");
+data.push({
+ngay:i[0].value,
+kh:i[1].value,
+cuoc:unformatMoney(i[2].value),
+ke:unformatMoney(i[3].value),
+ha:unformatMoney(i[4].value),
+cong:unformatMoney(i[5].value),
+thu:unformatMoney(i[6].value),
+xhd:unformatMoney(i[7].value)
 });
 });
-localStorage.setItem("DATA_"+monthPicker.value,JSON.stringify(arr));
-alert("Đã lưu tháng "+monthPicker.value);
+localStorage.setItem("data_"+monthPicker.value,JSON.stringify(data));
+alert("Đã lưu!");
 }
 
-function taiThang(m){
+function taiThang(){
 tbody.innerHTML="";
-(JSON.parse(localStorage.getItem("DATA_"+m)||"[]")).forEach(d=>themDong(d));
-const locked=localStorage.getItem("LOCK_"+m);
-lockStatus.innerText=locked?"🔒 THÁNG ĐÃ CHỐT":"";
-tbody.querySelectorAll("input").forEach(i=>i.disabled=locked);
+let data=JSON.parse(localStorage.getItem("data_"+monthPicker.value)||"[]");
+data.forEach(d=>themDong(d));
 calcTong();
+
+if(localStorage.getItem("lock_"+monthPicker.value)){
+lockStatus.innerText="🔒 ĐÃ KHÓA";
+}else{
+lockStatus.innerText="";
+}
 }
 
-function chotThang(){
-if(!monthPicker.value)return alert("Chọn tháng");
-if(!confirm("Chốt tháng sẽ khóa và không sửa được. Tiếp tục?"))return;
-luuThang();
-localStorage.setItem("LOCK_"+monthPicker.value,"1");
-taiThang(monthPicker.value);
+function khoaThang(){
+localStorage.setItem("lock_"+monthPicker.value,true);
+lockStatus.innerText="🔒 ĐÃ KHÓA";
 }
 
-monthPicker.onchange=()=>taiThang(monthPicker.value);
-
-/* ========= NHẬT KÝ ========= */
-function loadNhatKy(){
-listThang.innerHTML="";
-Object.keys(localStorage).forEach(k=>{
-if(k.startsWith("DATA_")){
-const m=k.replace("DATA_","");
-listThang.innerHTML+=`<li><a href="#" onclick="monthPicker.value='${m}';showTab('nhap');taiThang('${m}')">${m}</a></li>`;
-}});
+function prevMonth(){
+let d=new Date(monthPicker.value+"-01");
+d.setMonth(d.getMonth()-1);
+monthPicker.value=d.toISOString().slice(0,7);
+taiThang();
 }
 
-/* ========= EXCEL ========= */
-function xuatExcel(){
-if(!monthPicker.value)return;
-const wb=XLSX.utils.book_new();
-const ws=[["Ngày","Khách","SĐT","Xe","VC","Kè","Hạ","Công","Thu","XHD","Ghi chú"]];
-tbody.querySelectorAll("tr").forEach(tr=>{
-ws.push([...tr.querySelectorAll("input")].map(i=>i.value));
-});
-XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ws),"DATA");
-XLSX.writeFile(wb,"CRM_HOANG_LONG_"+monthPicker.value+".xlsx");
+function nextMonth(){
+let d=new Date(monthPicker.value+"-01");
+d.setMonth(d.getMonth()+1);
+monthPicker.value=d.toISOString().slice(0,7);
+taiThang();
 }
 
-/* ========= CHART ========= */
-let chart1,chart2;
-function loadChart(){
-const byDay={},byMonth={};
-Object.keys(localStorage).forEach(k=>{
-if(k.startsWith("DATA_")){
-const m=k.replace("DATA_","");
-let total=0;
-JSON.parse(localStorage.getItem(k)).forEach(d=>{
-total+=Number(d.thu||0);
-if(d.ngay)byDay[d.ngay]=(byDay[d.ngay]||0)+Number(d.thu||0);
-});
-byMonth[m]=total;
-}});
-if(chart1)chart1.destroy();
-if(chart2)chart2.destroy();
-chart1=new Chart(chartNgay,{type:"bar",
-data:{labels:Object.keys(byDay),datasets:[{label:"Theo ngày",data:Object.values(byDay)}]}});
-chart2=new Chart(chartThang,{type:"line",
-data:{labels:Object.keys(byMonth),datasets:[{label:"Theo tháng",data:Object.values(byMonth)}]}});
-}
+monthPicker.onchange=taiThang;
+
+window.onload=()=>{
+const now=new Date();
+monthPicker.value=now.toISOString().slice(0,7);
+taiThang();
+};
+
 </script>
 
 </body>
