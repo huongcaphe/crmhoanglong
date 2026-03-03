@@ -11,7 +11,7 @@
 <style>
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial, sans-serif;
 background:#f4f6f9;
 }
 
@@ -23,12 +23,12 @@ padding:18px 30px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+flex-wrap:wrap;
 box-shadow:0 3px 10px rgba(0,0,0,0.15);
 }
 
-/* LOGO TEXT */
 .logo{
-font-size:30px;
+font-size:32px;
 font-weight:900;
 letter-spacing:2px;
 }
@@ -37,10 +37,12 @@ letter-spacing:2px;
 nav{
 background:#163d73;
 display:flex;
+flex-wrap:wrap;
 }
 
 nav button{
 flex:1;
+min-width:150px;
 padding:14px;
 border:none;
 background:#163d73;
@@ -66,6 +68,7 @@ border:none;
 border-radius:6px;
 cursor:pointer;
 font-weight:bold;
+margin:5px 5px 5px 0;
 }
 
 .btn-primary{background:#1f4c8f;color:white;}
@@ -73,8 +76,15 @@ font-weight:bold;
 .btn-danger{background:#d9534f;color:white;}
 .btn-warning{background:#f0ad4e;color:white;}
 
+/* TABLE WRAPPER */
+.table-wrapper{
+overflow-x:auto;
+width:100%;
+}
+
 /* TABLE */
 table{
+min-width:1100px;
 width:100%;
 border-collapse:collapse;
 margin-top:15px;
@@ -85,6 +95,7 @@ th,td{
 border:1px solid #ddd;
 padding:8px;
 text-align:center;
+white-space:nowrap;
 }
 
 th{
@@ -128,6 +139,7 @@ canvas{
 background:white;
 padding:15px;
 border-radius:8px;
+max-width:100%;
 }
 
 .log-box{
@@ -153,6 +165,41 @@ padding:12px;
 font-size:14px;
 }
 
+/* MOBILE */
+@media (max-width:768px){
+
+.logo{font-size:22px;}
+
+header{
+padding:15px;
+flex-direction:column;
+gap:10px;
+text-align:center;
+}
+
+nav button{
+font-size:13px;
+padding:10px;
+}
+
+.container{
+padding:10px;
+}
+
+.total-box{
+font-size:18px;
+}
+
+.total-box span{
+font-size:20px;
+}
+
+button{
+font-size:13px;
+padding:6px 10px;
+}
+
+}
 </style>
 </head>
 
@@ -194,6 +241,7 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 <button class="btn-warning" onclick="lockMonth()">Khóa tháng</button>
 <button class="btn-primary" onclick="exportExcel()">Xuất Excel</button>
 
+<div class="table-wrapper">
 <table id="dataTable">
 <thead>
 <tr>
@@ -222,6 +270,7 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 </tfoot>
 </table>
 </div>
+</div>
 
 <!-- PAGE 2 -->
 <div id="page2" class="container hidden">
@@ -241,8 +290,6 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 </footer>
 
 <script>
-
-/* === GIỮ NGUYÊN TOÀN BỘ LOGIC === */
 
 let chart;
 const ADMIN_USER="admin";
