@@ -9,87 +9,39 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#f4f6f9;
-}
+body{margin:0;font-family:Arial;background:#f4f6f9;}
 header{
-    background:linear-gradient(90deg,#0f2f5f,#1f4c8f);
-    color:white;
-    padding:15px 25px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-nav{
-    background:#163d73;
-    display:flex;
-}
+background:linear-gradient(90deg,#0f2f5f,#1f4c8f);
+color:white;padding:15px 25px;
+display:flex;justify-content:space-between;align-items:center;}
+nav{background:#163d73;display:flex;}
 nav button{
-    flex:1;
-    padding:12px;
-    border:none;
-    background:#163d73;
-    color:white;
-    cursor:pointer;
-    font-weight:bold;
-}
-nav button.active{
-    background:#1f4c8f;
-}
-.container{ padding:20px; }
-
-button{
-    padding:8px 14px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
+flex:1;padding:12px;border:none;
+background:#163d73;color:white;
+cursor:pointer;font-weight:bold;}
+nav button.active{background:#1f4c8f;}
+.container{padding:20px;}
+button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;}
 .btn-primary{background:#1f4c8f;color:white;}
 .btn-success{background:#28a745;color:white;}
 .btn-danger{background:#d9534f;color:white;}
 .btn-warning{background:#f0ad4e;color:white;}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:15px;
-    background:white;
-}
-th,td{
-    border:1px solid #ddd;
-    padding:8px;
-    text-align:center;
-}
-th{ background:#e9ecef; }
-
+table{width:100%;border-collapse:collapse;margin-top:15px;background:white;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;}
+th{background:#e9ecef;}
 .total-box{
-    background:white;
-    padding:15px;
-    margin-top:10px;
-    border-radius:8px;
-    font-size:22px;
-}
-.total-box span{
-    color:#e67e22;
-    font-size:26px;
-    font-weight:bold;
-}
-
+background:white;padding:15px;margin-top:10px;
+border-radius:8px;font-size:22px;}
+.total-box span{color:#e67e22;font-size:26px;font-weight:bold;}
 .login-box{
-    max-width:320px;
-    margin:120px auto;
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 0 15px rgba(0,0,0,0.1);
-}
-
+max-width:320px;margin:120px auto;
+background:white;padding:25px;border-radius:10px;
+box-shadow:0 0 15px rgba(0,0,0,0.1);}
 .hidden{display:none;}
 canvas{background:white;padding:15px;border-radius:8px;}
 .log-box{background:white;padding:15px;border-radius:8px;margin-top:20px;}
 input{padding:6px;width:100%;box-sizing:border-box;}
+.tong-row{background:#e5b72f;font-weight:bold;}
 </style>
 </head>
 
@@ -97,29 +49,29 @@ input{padding:6px;width:100%;box-sizing:border-box;}
 
 <!-- LOGIN -->
 <div id="loginPage" class="login-box">
-    <h3>Đăng nhập Admin</h3>
-    <input type="text" id="username" placeholder="Tên đăng nhập"><br><br>
-    <input type="password" id="password" placeholder="Mật khẩu"><br><br>
-    <button class="btn-primary" onclick="login()">Đăng nhập</button>
+<h3>Đăng nhập Admin</h3>
+<input type="text" id="username" placeholder="Tên đăng nhập"><br><br>
+<input type="password" id="password" placeholder="Mật khẩu"><br><br>
+<button class="btn-primary" onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- MAIN -->
 <div id="mainPage" class="hidden">
 
 <header>
-    <div>CRM HOÀNG LONG</div>
-    <button class="btn-danger" onclick="logout()">Đăng xuất</button>
+<div>CRM HOÀNG LONG</div>
+<button class="btn-danger" onclick="logout()">Đăng xuất</button>
 </header>
 
 <nav>
-    <button id="menu1" class="active" onclick="showPage('page1')">Quản lý doanh thu</button>
-    <button id="menu2" onclick="showPage('page2')">Nhật ký & Biểu đồ</button>
+<button id="menu1" class="active" onclick="showPage('page1')">Quản lý doanh thu</button>
+<button id="menu2" onclick="showPage('page2')">Nhật ký & Biểu đồ</button>
 </nav>
 
 <!-- PAGE 1 -->
 <div id="page1" class="container">
 
-<input type="month" id="monthPicker" onchange="loadData()">
+<input type="month" id="monthPicker">
 
 <div class="total-box">
 TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
@@ -136,31 +88,38 @@ TỔNG DOANH THU: <span id="totalRevenue">0</span> VNĐ
 <tr>
 <th>Ngày</th>
 <th>Khách hàng</th>
+<th>SĐT</th>
+<th>Xe</th>
 <th>Cước VC</th>
 <th>KH kè thêm</th>
 <th>Hạ rỗng</th>
 <th>Cước công</th>
 <th>Thu tiền</th>
-<th>XHD</th>
+<th>Tổng XHD</th>
+<th>Ghi chú</th>
 <th>Xóa</th>
 </tr>
 </thead>
 <tbody></tbody>
+<tfoot>
+<tr class="tong-row">
+<td colspan="8">TỔNG THU</td>
+<td id="tongThu">0</td>
+<td id="tongXHD">0</td>
+<td colspan="2"></td>
+</tr>
+</tfoot>
 </table>
-
 </div>
 
 <!-- PAGE 2 -->
 <div id="page2" class="container hidden">
-
 <h2>Biểu đồ doanh thu</h2>
 <canvas id="revenueChart" height="100"></canvas>
-
 <div class="log-box">
 <h3>Nhật ký tháng</h3>
 <ul id="monthLog"></ul>
 </div>
-
 </div>
 
 </div>
@@ -172,139 +131,145 @@ const ADMIN_USER="admin";
 const ADMIN_PASS="vthoanglong";
 
 function login(){
-    if(username.value===ADMIN_USER && password.value===ADMIN_PASS){
-        loginPage.classList.add("hidden");
-        mainPage.classList.remove("hidden");
-        monthPicker.value=new Date().toISOString().slice(0,7);
-        loadData();
-    }else{
-        alert("Sai tài khoản hoặc mật khẩu");
-    }
+if(username.value===ADMIN_USER && password.value===ADMIN_PASS){
+loginPage.classList.add("hidden");
+mainPage.classList.remove("hidden");
+monthPicker.value=new Date().toISOString().slice(0,7);
+loadData();
+}else{alert("Sai tài khoản hoặc mật khẩu");}
 }
 
-function logout(){ location.reload(); }
+function logout(){location.reload();}
 
 function showPage(page){
-    page1.classList.add("hidden");
-    page2.classList.add("hidden");
-    menu1.classList.remove("active");
-    menu2.classList.remove("active");
-
-    document.getElementById(page).classList.remove("hidden");
-
-    if(page==="page1") menu1.classList.add("active");
-    else menu2.classList.add("active");
-
-    updateChart();
-    updateLog();
+page1.classList.add("hidden");
+page2.classList.add("hidden");
+menu1.classList.remove("active");
+menu2.classList.remove("active");
+document.getElementById(page).classList.remove("hidden");
+if(page==="page1") menu1.classList.add("active");
+else menu2.classList.add("active");
+updateChart();
+updateLog();
 }
 
 function formatMoney(input){
-    let value=input.value.replace(/\D/g,'');
-    input.value=Number(value).toLocaleString();
-    calculateTotal();
+let value=input.value.replace(/\D/g,'');
+input.value=Number(value).toLocaleString();
+calculateTotal();
 }
 
 function addRow(data={}){
-    const tbody=document.querySelector("#dataTable tbody");
-    let row=tbody.insertRow();
+const tbody=document.querySelector("#dataTable tbody");
+let row=tbody.insertRow();
 
-    row.innerHTML=`
-    <td><input type="date" value="${data.date||new Date().toISOString().split('T')[0]}"></td>
-    <td><input value="${data.customer||''}"></td>
-    <td><input oninput="formatMoney(this)" value="${data.vc||''}"></td>
-    <td><input oninput="formatMoney(this)" value="${data.extra||''}"></td>
-    <td><input oninput="formatMoney(this)" value="${data.empty||''}"></td>
-    <td><input oninput="formatMoney(this)" value="${data.labour||''}"></td>
-    <td><input oninput="formatMoney(this)" value="${data.pay||''}"></td>
-    <td><input value="${data.xhd||''}"></td>
-    <td><button class="btn-danger" onclick="this.closest('tr').remove();calculateTotal();">X</button></td>
-    `;
+row.innerHTML=`
+<td><input type="date" value="${data.date||new Date().toISOString().split('T')[0]}"></td>
+<td><input value="${data.customer||''}"></td>
+<td><input value="${data.phone||''}"></td>
+<td><input value="${data.car||''}"></td>
+<td><input oninput="formatMoney(this)" value="${data.vc||''}"></td>
+<td><input oninput="formatMoney(this)" value="${data.extra||''}"></td>
+<td><input oninput="formatMoney(this)" value="${data.empty||''}"></td>
+<td><input oninput="formatMoney(this)" value="${data.labour||''}"></td>
+<td><input oninput="formatMoney(this)" value="${data.pay||''}"></td>
+<td><input oninput="formatMoney(this)" value="${data.xhd||''}"></td>
+<td><input value="${data.note||''}"></td>
+<td><button class="btn-danger" onclick="this.closest('tr').remove();calculateTotal();">X</button></td>
+`;
 }
 
 function calculateTotal(){
-    let total=0;
-    document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
-        let val=row.cells[6].querySelector("input").value.replace(/,/g,'');
-        total+=Number(val)||0;
-    });
-    totalRevenue.textContent=total.toLocaleString();
+let total=0,tongXHD=0;
+document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
+let pay=row.cells[8].querySelector("input").value.replace(/,/g,'');
+let xhd=row.cells[9].querySelector("input").value.replace(/,/g,'');
+total+=Number(pay)||0;
+tongXHD+=Number(xhd)||0;
+});
+totalRevenue.textContent=total.toLocaleString();
+tongThu.textContent=total.toLocaleString();
+tongXHD.textContent=tongXHD.toLocaleString();
 }
 
 function saveData(){
-    let data=[];
-    document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
-        data.push({
-            date:row.cells[0].querySelector("input").value,
-            customer:row.cells[1].querySelector("input").value,
-            vc:row.cells[2].querySelector("input").value,
-            extra:row.cells[3].querySelector("input").value,
-            empty:row.cells[4].querySelector("input").value,
-            labour:row.cells[5].querySelector("input").value,
-            pay:row.cells[6].querySelector("input").value,
-            xhd:row.cells[7].querySelector("input").value
-        });
-    });
-    localStorage.setItem(monthPicker.value,JSON.stringify(data));
-    alert("Đã lưu");
+let data=[];
+document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
+data.push({
+date:row.cells[0].querySelector("input").value,
+customer:row.cells[1].querySelector("input").value,
+phone:row.cells[2].querySelector("input").value,
+car:row.cells[3].querySelector("input").value,
+vc:row.cells[4].querySelector("input").value,
+extra:row.cells[5].querySelector("input").value,
+empty:row.cells[6].querySelector("input").value,
+labour:row.cells[7].querySelector("input").value,
+pay:row.cells[8].querySelector("input").value,
+xhd:row.cells[9].querySelector("input").value,
+note:row.cells[10].querySelector("input").value
+});
+});
+localStorage.setItem(monthPicker.value,JSON.stringify(data));
+alert("Đã lưu");
 }
 
 function loadData(){
-    const tbody=document.querySelector("#dataTable tbody");
-    tbody.innerHTML="";
-    let data=JSON.parse(localStorage.getItem(monthPicker.value))||[];
-
-    if(data.length===0){
-        addRow();
-    }else{
-        data.forEach(d=>addRow(d));
-    }
-    calculateTotal();
+const tbody=document.querySelector("#dataTable tbody");
+tbody.innerHTML="";
+let data=JSON.parse(localStorage.getItem(monthPicker.value))||[];
+if(data.length===0){addRow();}
+else{data.forEach(d=>addRow(d));}
+calculateTotal();
 }
 
 function lockMonth(){
-    localStorage.setItem("lock_"+monthPicker.value,"true");
-    alert("Đã khóa tháng");
+localStorage.setItem("lock_"+monthPicker.value,"true");
+alert("Đã khóa tháng");
 }
 
 function exportExcel(){
-    let wb=XLSX.utils.book_new();
-    let ws_data=[["Ngày","Khách hàng","Cước VC","KH kè thêm","Hạ rỗng","Cước công","Thu tiền","XHD"]];
-    document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
-        ws_data.push([
-            row.cells[0].querySelector("input").value,
-            row.cells[1].querySelector("input").value,
-            row.cells[2].querySelector("input").value,
-            row.cells[3].querySelector("input").value,
-            row.cells[4].querySelector("input").value,
-            row.cells[5].querySelector("input").value,
-            row.cells[6].querySelector("input").value,
-            row.cells[7].querySelector("input").value
-        ]);
-    });
-    let ws=XLSX.utils.aoa_to_sheet(ws_data);
-    XLSX.utils.book_append_sheet(wb,ws,"DoanhThu");
-    XLSX.writeFile(wb,"DoanhThu_"+monthPicker.value+".xlsx");
+let wb=XLSX.utils.book_new();
+let ws_data=[["Ngày","Khách hàng","SĐT","Xe","Cước VC","KH kè thêm","Hạ rỗng","Cước công","Thu tiền","Tổng XHD","Ghi chú"]];
+document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
+ws_data.push([
+row.cells[0].querySelector("input").value,
+row.cells[1].querySelector("input").value,
+row.cells[2].querySelector("input").value,
+row.cells[3].querySelector("input").value,
+row.cells[4].querySelector("input").value,
+row.cells[5].querySelector("input").value,
+row.cells[6].querySelector("input").value,
+row.cells[7].querySelector("input").value,
+row.cells[8].querySelector("input").value,
+row.cells[9].querySelector("input").value,
+row.cells[10].querySelector("input").value
+]);
+});
+let ws=XLSX.utils.aoa_to_sheet(ws_data);
+XLSX.utils.book_append_sheet(wb,ws,"DoanhThu");
+XLSX.writeFile(wb,"DoanhThu_"+monthPicker.value+".xlsx");
 }
 
 function updateChart(){
-    let labels=[],values=[];
-    document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
-        labels.push(row.cells[0].querySelector("input").value);
-        values.push(Number(row.cells[6].querySelector("input").value.replace(/,/g,''))||0);
-    });
-    if(chart) chart.destroy();
-    chart=new Chart(document.getElementById('revenueChart'),{
-        type:'bar',
-        data:{labels:labels,datasets:[{label:'Doanh thu',data:values,backgroundColor:'#1f4c8f'}]}
-    });
+let labels=[],values=[];
+document.querySelectorAll("#dataTable tbody tr").forEach(row=>{
+labels.push(row.cells[0].querySelector("input").value);
+values.push(Number(row.cells[8].querySelector("input").value.replace(/,/g,''))||0);
+});
+if(chart) chart.destroy();
+chart=new Chart(document.getElementById('revenueChart'),{
+type:'bar',
+data:{labels:labels,datasets:[{label:'Doanh thu',data:values,backgroundColor:'#1f4c8f'}]}
+});
 }
 
 function updateLog(){
-    monthLog.innerHTML="";
-    monthLog.innerHTML+="<li>Tháng: "+monthPicker.value+"</li>";
-    monthLog.innerHTML+="<li>Tổng doanh thu: "+totalRevenue.textContent+" VNĐ</li>";
+monthLog.innerHTML="";
+monthLog.innerHTML+="<li>Tháng: "+monthPicker.value+"</li>";
+monthLog.innerHTML+="<li>Tổng doanh thu: "+totalRevenue.textContent+" VNĐ</li>";
 }
+
+monthPicker.addEventListener("change",loadData);
 
 </script>
 
